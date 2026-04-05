@@ -7,39 +7,97 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #4f46e5; --bg: #f8fafc; }
-        body { background: var(--bg); font-family: 'PingFang TC', sans-serif; margin: 0; padding: 20px; }
+        :root { 
+            --primary: #4f46e5; 
+            --secondary: #7c3aed;
+            --bg: #f8fafc; 
+            --card: #ffffff;
+        }
+        body { background: var(--bg); font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 800px; margin: auto; }
-        .search-box { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
-        input { width: 70%; padding: 15px; border: 2px solid #eef2ff; border-radius: 15px; font-size: 1rem; outline: none; }
-        .btn { padding: 15px 30px; background: var(--primary); color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; }
-        .dashboard { display: none; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: white; padding: 25px; border-radius: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .chart-container { height: 300px; position: relative; margin-bottom: 30px; }
-        .history-item { border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 20px; font-size: 0.9rem; }
+        
+        /* 搜尋區塊 */
+        .search-box { 
+            background: white; 
+            padding: 40px 20px; 
+            border-radius: 30px; 
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.1); 
+            text-align: center; 
+            margin-bottom: 25px; 
+        }
+        .search-box h2 { color: var(--primary); margin-bottom: 10px; font-weight: 800; }
+        input { 
+            width: 60%; 
+            padding: 15px; 
+            border: 2px solid #eef2ff; 
+            border-radius: 15px; 
+            font-size: 1rem; 
+            outline: none; 
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(79, 70, 229, 0.1); }
+        .btn { 
+            padding: 15px 30px; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: white; 
+            border: none; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-left: 10px;
+        }
+
+        /* 儀表板內容 */
+        .dashboard { display: none; animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: var(--card); padding: 25px; border-radius: 25px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .card h3 { margin-top: 0; color: #334155; display: flex; align-items: center; gap: 10px; }
+        
+        /* 圖表容器 */
+        .chart-container { height: 350px; position: relative; margin: 20px 0; }
+        
+        /* 歷史清單 */
+        .history-item { 
+            border-left: 5px solid var(--primary); 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            background: #fdfcff;
+            border-radius: 0 15px 15px 0;
+            transition: 0.2s;
+        }
+        .history-item:hover { background: #f1f5f9; }
+        .item-header { display: flex; justify-content: space-between; font-weight: bold; color: #1e1b4b; margin-bottom: 5px; }
+        .item-comment { color: #64748b; font-size: 0.95rem; line-height: 1.5; margin: 8px 0; }
+        .item-todo { color: var(--primary); font-size: 0.85rem; font-weight: bold; background: #eef2ff; padding: 5px 10px; border-radius: 8px; display: inline-block; }
+
+        @media (max-width: 600px) {
+            input { width: 100%; margin-bottom: 10px; }
+            .btn { width: 100%; margin-left: 0; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="search-box">
-        <h2 style="color:var(--primary);">📈 學生學習成長儀表板</h2>
-        <p style="color:#64748b;">輸入學生姓名以查看歷史數據與成長曲線</p>
-        <input type="text" id="studentName" placeholder="例如：吳芮瑀">
-        <button class="btn" onclick="fetchData()">查詢 <i class="fas fa-search"></i></button>
+        <h2><i class="fas fa-chart-line"></i> 學力原點・成長軌跡</h2>
+        <p style="color:#64748b;">輸入您的姓名，檢視本學期的專業數據回饋</p>
+        <input type="text" id="studentName" placeholder="請輸入學生姓名">
+        <button class="btn" onclick="fetchData()">查詢紀錄</button>
     </div>
 
     <div id="dashboard" class="dashboard">
         <div class="card">
-            <h3 style="margin-top:0;"><i class="fas fa-chart-line"></i> 近期表現趨勢</h3>
+            <h3><i class="fas fa-wave-square"></i> 學習掌握度趨勢圖</h3>
             <div class="chart-container">
                 <canvas id="myChart"></canvas>
             </div>
+            <p style="font-size: 0.8rem; color: #94a3b8; text-align: center;">※ 黃線代表您的學習信心，綠線代表老師評估的轉換深度</p>
         </div>
 
         <div class="card">
-            <h3><i class="fas fa-history"></i> 歷史授課點評</h3>
+            <h3><i class="fas fa-list-ul"></i> 歷次授課重點回顧</h3>
             <div id="historyList"></div>
         </div>
     </div>
@@ -49,22 +107,27 @@
     let myChart = null;
 
     async function fetchData() {
-        const name = document.getElementById('studentName').value;
+        const name = document.getElementById('studentName').value.trim();
         if(!name) return alert("請輸入姓名");
         
-        const scriptURL = '您的GAS網址'; // 務必填入您的 GAS 網址 (sumyVQ版本)
+        // --- 請確認此網址為您最新的 GAS 部署網址 ---
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxdXgNvOgADlUgO1UeiN0A-p5SmAYp8_5U5Cc_F0HURthc4YxJWS72rK91pazl21MbMuA/exec'; 
         
         try {
             const response = await fetch(`${scriptURL}?name=${encodeURIComponent(name)}`);
             const data = await response.json();
             
-            if(data.length === 0) return alert("找不到該學生的紀錄");
+            if(data.length === 0) {
+                alert("目前尚無「" + name + "」的數據紀錄，請聯繫 Eric 老師。");
+                return;
+            }
             
             document.getElementById('dashboard').style.display = 'block';
             renderChart(data);
             renderHistory(data);
         } catch (e) {
-            alert("讀取失敗，請確認資料庫權限");
+            console.error(e);
+            alert("讀取失敗，請確認網路連線或 GAS 權限設置。");
         }
     }
 
@@ -77,21 +140,56 @@
             data: {
                 labels: data.map(d => d.date),
                 datasets: [
-                    { label: '學生信心', data: data.map(d => d.sScore), borderColor: '#fbbf24', tension: 0.4, fill: false },
-                    { label: '老師觀察', data: data.map(d => d.tScore), borderColor: '#10b981', tension: 0.4, fill: false }
+                    { 
+                        label: '學習信心 (sScore)', 
+                        data: data.map(d => d.sScore), 
+                        borderColor: '#fbbf24', 
+                        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                        tension: 0.4, 
+                        fill: true,
+                        pointRadius: 5
+                    },
+                    { 
+                        label: '實力掌握 (tScore)', 
+                        data: data.map(d => d.tScore), 
+                        borderColor: '#10b981', 
+                        backgroundColor: 'transparent',
+                        tension: 0.4, 
+                        fill: false,
+                        pointRadius: 5
+                    }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 10 } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: { 
+                    y: { 
+                        min: 0, 
+                        max: 10,
+                        ticks: { stepSize: 1 }
+                    } 
+                } 
+            }
         });
     }
 
     function renderHistory(data) {
         const list = document.getElementById('historyList');
-        list.innerHTML = data.reverse().map(d => `
+        // 將資料反轉，最新日期排最前面
+        const reversedData = [...data].reverse();
+        
+        list.innerHTML = reversedData.map(d => `
             <div class="history-item">
-                <strong>[${d.date}] ${d.progress}</strong><br>
-                <span style="color:#64748b;">${d.comment}</span><br>
-                <small style="color:#4f46e5;">任務：${d.todo}</small>
+                <div class="item-header">
+                    <span>${d.date} | ${d.progress}</span>
+                    <span style="color:var(--primary);">綜指: ${(parseFloat(d.sScore)*0.4 + parseFloat(d.tScore)*0.6).toFixed(1)}</span>
+                </div>
+                <div class="item-comment">${d.weakness || "無特別備註"}</div>
+                <div class="item-todo"><i class="fas fa-check-circle"></i> 待辦任務：${d.todo || "無"}</div>
             </div>
         `).join('');
     }
