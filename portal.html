@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學力原點 | 個人學習儀表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; }
+        body { background: var(--bg); font-family: 'PingFang TC', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .search-box { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
+        input { width: 70%; padding: 15px; border: 2px solid #eef2ff; border-radius: 15px; font-size: 1rem; outline: none; }
+        .btn { padding: 15px 30px; background: var(--primary); color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; }
+        .dashboard { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: white; padding: 25px; border-radius: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .chart-container { height: 300px; position: relative; margin-bottom: 30px; }
+        .history-item { border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 20px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="search-box">
+        <h2 style="color:var(--primary);">📈 學生學習成長儀表板</h2>
+        <p style="color:#64748b;">輸入學生姓名以查看歷史數據與成長曲線</p>
+        <input type="text" id="studentName" placeholder="例如：吳芮瑀">
+        <button class="btn" onclick="fetchData()">查詢 <i class="fas fa-search"></i></button>
+    </div>
+
+    <div id="dashboard" class="dashboard">
+        <div class="card">
+            <h3 style="margin-top:0;"><i class="fas fa-chart-line"></i> 近期表現趨勢</h3>
+            <div class="chart-container">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-history"></i> 歷史授課點評</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let myChart = null;
+
+    async function fetchData() {
+        const name = document.getElementById('studentName').value;
+        if(!name) return alert("請輸入姓名");
+        
+        const scriptURL = '您的GAS網址'; // 務必填入您的 GAS 網址 (sumyVQ版本)
+        
+        try {
+            const response = await fetch(`${scriptURL}?name=${encodeURIComponent(name)}`);
+            const data = await response.json();
+            
+            if(data.length === 0) return alert("找不到該學生的紀錄");
+            
+            document.getElementById('dashboard').style.display = 'block';
+            renderChart(data);
+            renderHistory(data);
+        } catch (e) {
+            alert("讀取失敗，請確認資料庫權限");
+        }
+    }
+
+    function renderChart(data) {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.date),
+                datasets: [
+                    { label: '學生信心', data: data.map(d => d.sScore), borderColor: '#fbbf24', tension: 0.4, fill: false },
+                    { label: '老師觀察', data: data.map(d => d.tScore), borderColor: '#10b981', tension: 0.4, fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 10 } } }
+        });
+    }
+
+    function renderHistory(data) {
+        const list = document.getElementById('historyList');
+        list.innerHTML = data.reverse().map(d => `
+            <div class="history-item">
+                <strong>[${d.date}] ${d.progress}</strong><br>
+                <span style="color:#64748b;">${d.comment}</span><br>
+                <small style="color:#4f46e5;">任務：${d.todo}</small>
+            </div>
+        `).join('');
+    }
+</script>
+</body>
+</html>
