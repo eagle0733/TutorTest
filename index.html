@@ -49,7 +49,6 @@
         .analysis-card { background: #f8fafc; padding: 30px; border-radius: 30px; border-left: 8px solid var(--primary); text-align: left; }
         .advice-box { background: white; border-radius: 20px; padding: 25px; margin-top: 20px; border: 1.5px dashed #cbd5e1; line-height: 1.8; color: #334155; }
 
-        /* 彈出確認視窗樣式 */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index:1000; align-items:center; justify-content:center; }
         .modal-content { background:white; padding:40px; border-radius:30px; text-align:center; max-width:400px; box-shadow:0 20px 50px rgba(0,0,0,0.3); animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes pop { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
@@ -211,7 +210,6 @@
         const nextBtn = document.getElementById('nextBtn');
         nextBtn.disabled = !ans[cur];
         
-        // 如果是最後一題，改按鈕文字與顏色
         if(cur === 29) {
             nextBtn.innerHTML = '產出深度診斷報告 <i class="fas fa-file-signature"></i>';
             nextBtn.className = 'btn btn-next btn-submit';
@@ -274,14 +272,19 @@
             options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } }
         });
 
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxi2cOM6axAgzfXKFN6nICGA_B69fOlfunt0xEDvRGhikXVXo_fBmcwOteDs2QEEPvXhA/exec';
-        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({...userData, scoreA:pA, scoreB:pB, scoreC:pC, type:res.t}) });
+        // 這裡修改了資料傳送的標籤，讓 GAS 判斷這是診斷資料
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz7Uj5kMvCPACNz9ocNbn1PhnpVSdZGpXTfVXKNkwqLxx1AXsTjdI7sW5WCWOY9jZ4m/exec';
+        fetch(scriptURL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({...userData, scoreA:pA, scoreB:pB, scoreC:pC, type:res.t, type_flag: "DIAGNOSIS"}) 
+        });
     }
 
     function getDiagnosis(a, b, c) {
         if(a>=75 && b>=75) return { i:"🦅", t:"領航獵鷹", s:"高精準度、高續航力的頂尖領跑者", d:"具備強大的目標意識與邏輯拆解力。在群體中通常是領先者，但也容易因為環境挑戰性不足而產生「學習倦怠」。", a:"目前的學校進度可能已無法滿足他。建議引入跨年級競賽題或專案式學習。歡迎聯繫 Eric 老師，為孩子規劃高階學習里程碑。" };
         if(b>=70) return { i:"🐒", t:"閃電靈猴", s:"直覺敏銳、反應極快但穩定度欠佳", d:"反應靈活，能迅速理解新觀念，但容易在細節與重複性練習中分心。常出現「聽懂了但考不出」的現象。", a:"他需要的是「邏輯減速」與 SOP 化。老師會引導他從直覺轉化為穩定的解題規範。建議家長找我聊聊，解決「粗心大意」的長期頑疾。" };
-        if(a>=70) return { i:"🐘", t:"堅毅石象", s:"踏實勤奮、執行力強但思考較固定的執行者", d:"執行力極高，是模範生典型。但過度依賴公式與死背，面對大範圍、靈活變化的應用題時，常會感到力不從心。", a:"他需要的是「思維鬆土」。我會透過圖像建模帶領他從背後原理開始推導，幫孩子從「盲目努力」過渡到「高效理解」。歡迎預約面談。" };
+        if(a>=70) return { i:"🐘", t:"堅毅石象", s:"踏實勤奮、執行力強與思考較固定的執行者", d:"執行力極高，是模範生典型。但過度依賴公式與死背，面對大範圍、靈活變化的應用題時，常會感到力不從心。", a:"他需要的是「思維鬆土」。我會透過圖像建模帶領他從背後原理開始推導，幫孩子從「盲目努力」過渡到「高效理解」。歡迎預約面談。" };
         return { i:"✨", t:"潛力星火", s:"能量待點燃、需建立成就感的探索者", d:"目前學習動機較散亂，對困難題目有排斥感。這並非孩子不聰明，而是他還沒找到學習的「節奏感」與「成就感」。", a:"現在不宜給予過大壓力。老師會以「拆解目標」為主，透過小階段成功找回自信。請聯繫老師，我們一起找出點燃孩子火種的關鍵切入點。" };
     }
 </script>
