@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning DNA | 專業學習力診斷系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --secondary: #a855f7; --bg: #f8fafc; --text: #1e293b; }
+        body { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); font-family: 'PingFang TC', sans-serif; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); padding: 40px; border-radius: 32px; box-shadow: 0 40px 100px rgba(0,0,0,0.25); position: relative; }
+        
+        /* 標題與進度 */
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 2.4rem; color: #312e81; margin: 0; font-weight: 900; letter-spacing: 1px; }
+        .section-title { font-size: 1.2rem; color: var(--primary); font-weight: 700; text-align: center; margin-bottom: 20px; display: block; }
+        
+        /* 進度條 */
+        .progress-container { margin-bottom: 40px; }
+        .progress-bar { height: 10px; background: #e2e8f0; border-radius: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a855f7); width: 0%; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* 卡片切換 */
+        .card { display: none; }
+        .card.active { display: block; animation: slideUp 0.6s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 表單設計 */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .input-group { position: relative; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #4338ca; margin-bottom: 6px; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 1rem; outline: none; transition: 0.3s; box-sizing: border-box; background: white; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+        .error-msg { color: #ef4444; font-size: 0.75rem; margin-top: 5px; display: none; }
+
+        /* 題目樣式 */
+        .question-box { background: #fdfeff; padding: 30px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .question-text { font-size: 1.5rem; color: #1e1b4b; font-weight: 800; line-height: 1.6; text-align: center; min-height: 80px; }
+        
+        /* 選項按鈕 */
+        .options { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .opt-btn { padding: 15px 5px; background: white; border: 2px solid #f1f5f9; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: 600; text-align: center; color: #64748b; }
+        .opt-btn:hover { border-color: var(--primary); color: var(--primary); background: #f5f3ff; }
+        .opt-btn.selected { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+
+        /* 功能按鈕 */
+        .nav-btns { display: flex; justify-content: space-between; margin-top: 40px; }
+        .btn { padding: 14px 35px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .btn-prev { background: #f1f5f9; color: #64748b; }
+        .btn-next { background: var(--primary); color: white; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        .btn-next:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+        /* 結果報告頁 */
+        .report-header { text-align: center; margin-bottom: 30px; }
+        .type-icon { font-size: 80px; display: block; margin-bottom: 10px; }
+        .report-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; align-items: center; }
+        .analysis-card { background: #f8fafc; padding: 25px; border-radius: 24px; border-left: 6px solid var(--primary); }
+        .advice-box { background: white; border: 1.5px dashed #cbd5e1; padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 0.95rem; line-height: 1.6; }
+        .final-cta { margin-top: 30px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 25px; color: #475569; }
+
+        @media (max-width: 600px) {
+            .info-grid, .report-grid { grid-template-columns: 1fr; }
+            .options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="step-info" class="card active">
+        <div class="header"><h1>🧬 Learning DNA</h1><p>專業學習行為特徵深度診斷</p></div>
+        <div class="info-grid">
+            <div class="input-group"><label>姓名</label><input type="text" id="userName" placeholder="填寫學生姓名"></div>
+            <div class="input-group"><label>年級</label>
+                <select id="userGrade">
+                    <option value="">請選擇</option><option>國小</option><option>國一</option><option>國二</option><option>國三</option>
+                </select>
+            </div>
+            <div class="input-group"><label>電子信箱 (發送完整報告)</label><input type="email" id="userEmail" placeholder="example@mail.com"></div>
+            <div class="input-group"><label>LINE ID / 聯絡電話</label><input type="text" id="userLine" placeholder="老師聯繫用"></div>
+            <div class="input-group"><label>擅長科目</label><input type="text" id="userStrong" placeholder="如：數學"></div>
+            <div class="input-group"><label>弱勢科目</label><input type="text" id="userWeak" placeholder="如：英文"></div>
+        </div>
+        <div style="text-align: center;"><button class="btn btn-next" style="margin: auto;" onclick="validateAndStart()">開始深度檢測 <i class="fas fa-rocket"></i></button></div>
+    </div>
+
+    <div id="step-quiz" class="card">
+        <div class="progress-container">
+            <span class="section-title" id="sectionTitle">第一部分：自律執行力</span>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        
+        <div class="question-box">
+            <div id="qText" class="question-text">載入中...</div>
+            <div id="qOptions" class="options"></div>
+        </div>
+
+        <div class="nav-btns">
+            <button class="btn btn-prev" onclick="moveQ(-1)"><i class="fas fa-arrow-left"></i> 上一題</button>
+            <span id="qCount" style="color: #94a3b8; font-weight: bold; align-self: center;">1 / 30</span>
+            <button class="btn btn-next" id="nextBtn" onclick="moveQ(1)" disabled>下一題 <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div id="resultPage" class="card">
+        <div class="report-header">
+            <span id="typeIcon" class="type-icon"></span>
+            <h2 id="typeTitle" style="color: var(--primary); font-size: 2.2rem; margin: 0;"></h2>
+            <p id="typeSubtitle" style="color: #64748b; font-weight: 600;"></p>
+        </div>
+
+        <div class="report-grid">
+            <div><canvas id="radarChart"></canvas></div>
+            <div class="analysis-card">
+                <h4 style="margin:0; color:#1e1b4b;"><i class="fas fa-search"></i> 特質深度分析</h4>
+                <p id="typeDesc" style="font-size: 0.95rem; color:#475569; margin: 15px 0;"></p>
+                <div class="advice-box">
+                    <strong>💡 導師建議：</strong><br><span id="typeAdvice"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="final-cta">
+            <p>這份數據僅是成長的起點，真正的改變源於專業的引導。</p>
+            <p><strong>歡迎家長點擊下方聯繫 Eric 陳老師，預約一對一深度解析與試聽方案。</strong></p>
+            <div style="display: flex; justify-content: center; gap: 15px;">
+                <button class="btn btn-next" onclick="window.location.href='https://line.me/ti/p/6090888aa'">
+                    <i class="fab fa-line"></i> LINE 預約面談
+                </button>
+                <button class="btn btn-prev" onclick="location.reload()">重新檢測</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // A 自律 (1-10)
+        { q: "放學後，我能不需提醒就主動完成當日預定的學習任務。", d: "A", r: false },
+        { q: "面對枯燥的複習內容，我依然能維持穩定的專注度。", d: "A", r: false },
+        { q: "我有記錄學習進度或使用日程表的習慣。", d: "A", r: false },
+        { q: "遇到卡關的難題，我傾向獨立思考而非立即尋求答案。", d: "A", r: false },
+        { q: "一旦手機放在視線範圍內，我的學習效率會大幅下降。", d: "A", r: true },
+        { q: "我能將學習環境整理得井然有序，確保不受雜物干擾。", d: "A", r: false },
+        { q: "對於長期的考試目標，我能拆解成每日執行的計畫。", d: "A", r: false },
+        { q: "我習慣在睡前檢查隔天所需的課程物資與講義。", d: "A", r: false },
+        { q: "我常在截止日期前一刻才感到壓力並倉促完成作業。", d: "A", r: true },
+        { q: "我能克制娛樂慾望，確保完成學習目標後的獎勵感。", d: "A", r: false },
+        // B 邏輯 (11-20)
+        { q: "比起背誦現成的公式，我更喜歡探究背後的推導原理。", d: "B", r: false },
+        { q: "面對新概念，我能迅速聯想到過去學過的相關知識。", d: "B", r: false },
+        { q: "我能從繁雜的題目敘述中，精確萃取出核心邏輯條件。", d: "B", r: false },
+        { q: "我對於數字變化、圖表趨勢的敏感度高於文字描述。", d: "B", r: false },
+        { q: "聽完老師講解後，我能用自己的話重新建構邏輯給他人聽。", d: "B", r: false },
+        { q: "我喜歡拆解事物運作的規律，而非單純接受既定事實。", d: "B", r: false },
+        { q: "我覺得課本上的文字描述過於抽象，難以產生具體畫面感。", d: "B", r: true },
+        { q: "在解題時，我更在意解法的多樣性而非單一標準答案。", d: "B", r: false },
+        { q: "我能快速識破陷阱題中隱藏的邏輯矛盾。", d: "B", r: false },
+        { q: "相對於靈活應用，我更擅長處理重複性高的基本練習。", d: "B", r: true },
+        // C 心理 (21-30)
+        { q: "我對學習新領域保有強烈的好奇心，並視其為自我成長。", d: "C", r: false },
+        { q: "成績起伏不會影響我對該學科長期投入的熱情。", d: "C", r: false },
+        { q: "我敢於在課堂上暴露自己的盲點並提出深度質疑。", d: "C", r: false },
+        { q: "在大考場合下，我常感到生理性焦慮並導致實力受限。", d: "C", r: true },
+        { q: "我能從錯誤中分析成因，而非糾結於分數的損失。", d: "C", r: false },
+        { q: "解決高難度挑戰所帶來的滿足感遠超學習時的辛勞。", d: "C", r: false },
+        { q: "面對未曾見過的題型，我會感到興奮並嘗試解構。", d: "C", r: false },
+        { q: "當連續遇到幾題挫折時，我會產生「我不適合這科」的念頭。", d: "C", r: true },
+        { q: "我更在意自己掌握知識的程度，而非在班級中的排名。", d: "C", r: false },
+        { q: "我認為失敗是獲取反饋的必經路徑，能平靜看待挫折。", d: "C", r: false }
+    ];
+
+    let currentIdx = 0, answers = new Array(questions.length).fill(null), userData = {};
+
+    function validateAndStart() {
+        const name = document.getElementById('userName').value;
+        const email = document.getElementById('userEmail').value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if(!name) return alert("請輸入學生姓名");
+        if(!emailRegex.test(email)) return alert("請輸入正確的電子信箱格式");
+        
+        userData = { name, grade: document.getElementById('userGrade').value, email, line: document.getElementById('userLine').value, strong: document.getElementById('userStrong').value, weak: document.getElementById('userWeak').value };
+        document.getElementById('step-info').classList.remove('active');
+        document.getElementById('step-quiz').classList.add('active');
+        renderQ();
+    }
+
+    function renderQ() {
+        const q = questions[currentIdx];
+        document.getElementById('qText').innerText = q.q;
+        document.getElementById('qCount').innerText = `${currentIdx + 1} / 30`;
+        document.getElementById('progressFill').style.width = `${((currentIdx + 1)/30)*100}%`;
+        
+        // 更新標題
+        const titles = ["第一階段：自律執行力", "第二階段：邏輯吸收力", "第三階段：心理韌性度"];
+        document.getElementById('sectionTitle').innerText = titles[Math.floor(currentIdx/10)];
+
+        const container = document.getElementById('qOptions');
+        container.innerHTML = '';
+        ['極不符合','稍不符合','普通','符合','極符合'].forEach((t, i) => {
+            const btn = document.createElement('div');
+            btn.className = `opt-btn ${answers[currentIdx] === i+1 ? 'selected' : ''}`;
+            btn.innerText = t;
+            btn.onclick = () => {
+                answers[currentIdx] = i+1;
+                document.getElementById('nextBtn').disabled = false;
+                renderQ(); // 重新渲染選中狀態
+                if(currentIdx < 29) setTimeout(() => moveQ(1), 300);
+            };
+            container.appendChild(btn);
+        });
+        document.getElementById('nextBtn').disabled = (answers[currentIdx] === null);
+    }
+
+    function moveQ(n) {
+        if(currentIdx + n < 0) return;
+        if(currentIdx + n >= questions.length) return processResult();
+        currentIdx += n;
+        renderQ();
+    }
+
+    function processResult() {
+        let scores = {A:0, B:0, C:0};
+        questions.forEach((q, i) => {
+            let val = answers[i];
+            if(q.r) val = 6 - val;
+            scores[q.d] += val;
+        });
+
+        const pA = (scores.A * 2), pB = (scores.B * 2), pC = (scores.C * 2);
+        document.getElementById('step-quiz').classList.remove('active');
+        document.getElementById('resultPage').classList.add('active');
+
+        const diag = getDiagnosis(pA, pB, pC);
+        document.getElementById('typeIcon').innerText = diag.icon;
+        document.getElementById('typeTitle').innerText = diag.title;
+        document.getElementById('typeSubtitle').innerText = diag.sub;
+        document.getElementById('typeDesc').innerText = diag.desc;
+        document.getElementById('typeAdvice').innerText = diag.advice;
+
+        renderChart(pA, pB, pC);
+        
+        // 傳送到您的 GAS
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzz3VLddJWTzBTbUFOeVPlKuYcLK9EMjN0hqSmZX4POdWNAMuS_lt0hh6NrIxPOyEmK4w/exec';
+        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({...userData, scoreA:pA, scoreB:pB, scoreC:pC, type:diag.title}) });
+    }
+
+    function getDiagnosis(a, b, c) {
+        if(a >= 75 && b >= 75) return {
+            icon: "🦅", title: "領航獵鷹 (Elite)", sub: "高精準度、高續航力的頂尖學習者",
+            desc: "孩子具備極強的目標意識，對於複雜邏輯有天然的拆解力。在群體中通常是領跑者，但也容易因為環境挑戰性不足而感到倦怠。",
+            advice: "目前的學校進度可能已無法滿足他。建議引入跨年級競賽題目或專案式學習，並強化心理韌性，避免因「過度完美主義」而在挫折時出現情緒斷崖。歡迎聯繫老師，我們可以討論如何為他設定更高階的學習里程碑。"
+        };
+        if(b >= 70) return {
+            icon: "🐒", title: "閃電靈猴 (Intuitive)", sub: "直覺敏銳、反應極快但穩定度欠佳",
+            desc: "頭腦反應非常靈活，能迅速理解新觀念，但容易在細節與重複性練習中分心。這類孩子常說「我聽懂了」，但考試時卻因粗心或邏輯跳躍而失分。",
+            advice: "他的天賦在於「連結知識」。我們需要強化他的筆記結構化與限時訓練。老師會引導他使用「費曼教學法」，將直覺轉化為穩定的解題 SOP。建議家長找我聊聊如何透過系統化訓練，把他的『聰明』轉化為『穩定的高分』。"
+        };
+        if(a >= 70) return {
+            icon: "🐘", title: "堅毅石象 (Pragmatic)", sub: "踏實勤奮、執行力強但思考較僵化",
+            desc: "非常聽話且執行力極高，是老師眼中的模範生。但他過度依賴死背硬記，當面對大範圍、靈活變化的應用題時，常會感到力不從心，產生效率瓶頸。",
+            advice: "他需要的不是更多題目，而是「思維的鬆土」。老師會透過圖像建模與邏輯地圖，帶領他從公式背後推導原理。建議家長與我預約試聽，我將展示如何幫孩子從『盲目努力』過渡到『高效理解』。"
+        };
+        return {
+            icon: "✨", title: "潛力星火 (Sparking)", sub: "能量待點燃、需建立成就感的探索者",
+            desc: "目前學習動機較為零散，對於困難題目有較強的排斥感，心理韌性尚待開發。這不是孩子不聰明，而是他還沒找到學習的「節奏感」。",
+            advice: "現在不宜給予過大的成績壓力。老師的教學會以「拆解目標」為主，透過小階段的成功找回自信。建議家長聯繫老師，我們一起找出孩子對特定學科的排斥點，重新點燃他的學習熱忱。"
+        };
+    }
+
+    function renderChart(a, b, c) {
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['自律執行', '邏輯吸收', '心理韌性'],
+                datasets: [{
+                    label: '能力維度',
+                    data: [a, b, c],
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: '#6366f1',
+                    pointBackgroundColor: '#6366f1',
+                    borderWidth: 3
+                }]
+            },
+            options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } } }
+        });
+    }
+</script>
+</body>
+</html>
