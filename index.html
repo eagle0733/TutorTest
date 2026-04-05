@@ -1,0 +1,61 @@
+function doPost(e) {
+  var params = JSON.parse(e.postData.contents);
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  // 1. 寫入資料庫
+  sheet.appendRow([new Date(), params.name, params.grade, params.email, params.strong, params.weak, params.line, params.scoreA+"%", params.scoreB+"%", params.scoreC+"%", params.type]);
+  
+  // 2. 準備精美 HTML 信件內容
+  var htmlContent = `
+    <div style="font-family: 'PingFang TC', sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 15px;">
+      <h2 style="color: #6366f1; text-align: center;">🎓 Learning DNA 專業診斷報告</h2>
+      <p>親愛的 <strong>${params.name}</strong> 同學/家長您好：</p>
+      <p>感謝參與本次診斷，這份數據揭示了孩子目前最真實的學習行為特徵。</p>
+      
+      <div style="background-color: #f5f3ff; padding: 15px; border-radius: 10px; border-left: 5px solid #6366f1;">
+        <h3 style="margin-top: 0; color: #4338ca;">您的學習形象：${params.type}</h3>
+        <p style="font-size: 14px; color: #4b5563;">這代表您在學習過程中具備獨特的優勢與需要調整的盲點。</p>
+      </div>
+
+      <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>自律執行力：</strong></td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; color: #6366f1;">${params.scoreA}%</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>邏輯吸收力：</strong></td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; color: #6366f1;">${params.scoreB}%</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>心理韌性度：</strong></td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; color: #6366f1;">${params.scoreC}%</td>
+        </tr>
+      </table>
+
+      <div style="margin-top: 20px; font-size: 14px; line-height: 1.6;">
+        <p><strong>💡 老師的初步分析：</strong></p>
+        <p>這份數據顯示，孩子在${params.scoreA < 60 ? '「習慣養成」' : '「邏輯應用」'}上還有很大的成長空間。單純的補習無法解決根本問題，我們需要針對性地調整學習策略。</p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+      
+      <div style="text-align: center; color: #6b7280; font-size: 12px;">
+        <p>若您對報告內容有疑問，歡迎直接聯繫導師：</p>
+        <p><strong>導師：Eric 陳老師</strong></p>
+        <p>LINE ID：<strong>6090888aa</strong></p>
+      </div>
+    </div>
+  `;
+
+  // 寄給學生與老師
+  var teacherEmail = "eric.60908aa@gmail.com";
+  [params.email, teacherEmail].forEach(function(targetEmail) {
+    MailApp.sendEmail({
+      to: targetEmail,
+      subject: "【學習報告】" + params.name + " 同學的 Learning DNA 診斷結果",
+      htmlBody: htmlContent
+    });
+  });
+
+  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+}
