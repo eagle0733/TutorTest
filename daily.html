@@ -3,110 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>學力原點 | 課後即時診斷</title>
+    <title>學力原點 | 高端教學紀錄儀表板</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --accent: #f59e0b; }
-        body { background: var(--bg); font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; padding: 15px; margin: 0; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 550px; background: var(--card); padding: 30px; border-radius: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); margin: 20px 0; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
-        .header h2 { margin: 0; color: #1e1b4b; font-size: 1.6rem; letter-spacing: 1px; }
-        .section-box { background: #f8fafb; padding: 20px; border-radius: 20px; margin-bottom: 25px; border-left: 6px solid var(--primary); }
-        .student-part { background: #fffbeb; border-left-color: var(--accent); }
-        .section-title { font-weight: 800; color: #1e293b; margin-bottom: 15px; display: block; font-size: 1rem; }
-        label { display: block; font-weight: 700; margin-bottom: 8px; color: #475569; font-size: 0.9rem; }
-        input, textarea, select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; background: white; }
-        input:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
-        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-submit { width: 100%; padding: 20px; background: var(--primary); color: white; border: none; border-radius: 20px; font-weight: 800; font-size: 1.1rem; cursor: pointer; margin-top: 10px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); transition: 0.3s; }
+        :root { --primary: #4f46e5; --student: #fbbf24; --teacher: #10b981; --bg: #f3f4f6; }
+        body { background: var(--bg); font-family: 'PingFang TC', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 600px; background: white; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        /* Header Style */
+        .header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 30px; color: white; text-align: center; }
+        .header h2 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; }
+        
+        .main-content { padding: 30px; }
+        .section-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 25px; padding: 25px; margin-bottom: 25px; transition: 0.3s; }
+        .section-card:hover { border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .title-tag { display: inline-block; padding: 5px 15px; border-radius: 10px; font-weight: 800; font-size: 0.8rem; margin-bottom: 15px; text-transform: uppercase; }
+        
+        /* 量化滑桿樣式 */
+        .slider-group { margin: 20px 0; }
+        input[type=range] { width: 100%; height: 8px; border-radius: 5px; background: #d1d5db; outline: none; -webkit-appearance: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--primary); border-radius: 50%; cursor: pointer; }
+        
+        .select-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #f3f4f6; font-size: 1rem; font-weight: 600; }
+        textarea { width: 100%; border-radius: 15px; border: 2px solid #f3f4f6; padding: 15px; font-family: inherit; resize: none; }
+        
+        .btn-submit { width: 100%; padding: 22px; background: var(--primary); color: white; border: none; border-radius: 25px; font-weight: 900; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-submit:hover { background: #4338ca; transform: translateY(-3px); }
     </style>
 </head>
 <body>
+
 <div class="app-container">
     <div class="header">
-        <h2><i class="fas fa-file-signature"></i> 課後成長紀錄卡</h2>
-        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">專業導師：Eric 陳老師</p>
+        <h2>Eric 顧問教學紀錄</h2>
+        <p style="opacity: 0.8;">每一堂課，都是一次精準的校準</p>
     </div>
 
-    <div class="input-group" style="margin-bottom: 25px;">
-        <label>選擇學生名單</label>
-        <select id="sInfo">
-            <option value="" data-grade="">點擊選擇學生...</option>
-            <option value="吳芮瑀" data-grade="國一">吳芮瑀 (國一)</option>
-            <option value="許恩碩" data-grade="國一">許恩碩 (國一)</option>
-            <option value="張棨富" data-grade="國二">張棨富 (國二)</option>
-            <option value="王竑傑" data-grade="國小">王竑傑 (國小)</option>
-            <option value="程議正" data-grade="國一">程議正 (國一)</option>
-            <option value="黃子恩" data-grade="國小">黃子恩 (國小)</option>
-            <option value="吳宥彥" data-grade="國三">吳宥彥 (國三)</option>
-            <option value="黃子祐" data-grade="國一">黃子祐 (國一)</option>
-        </select>
-    </div>
-
-    <div class="section-box student-part">
-        <span class="section-title" style="color: #b45309;"><i class="fas fa-user-graduate"></i> 學生深度自評</span>
-        <div class="score-grid">
-            <div class="input-group"><label>今日信心 (1-10)</label><input type="number" id="sScore" min="1" max="10"></div>
-            <div class="input-group"><label>難度感覺 (1-10)</label><input type="number" id="diffScore" min="1" max="10"></div>
+    <div class="main-content">
+        <div class="section-card" style="border-left: 8px solid #cbd5e1;">
+            <label style="font-weight: 900;">👤 選擇今日授課學生</label>
+            <select id="sInfo" class="select-input" style="margin-top:10px;">
+                <option value="">點擊選擇...</option>
+                <option value="吳芮瑀" data-grade="國一">吳芮瑀 (國一)</option>
+                <option value="許恩碩" data-grade="國一">許恩碩 (國一)</option>
+                <option value="張棨富" data-grade="國二">張棨富 (國二)</option>
+                <option value="王竑傑" data-grade="國小">王竑傑 (國小)</option>
+                <option value="程議正" data-grade="國一">程議正 (國一)</option>
+                <option value="黃子恩" data-grade="國小">黃子恩 (國小)</option>
+                <option value="吳宥彥" data-grade="國三">吳宥彥 (國三)</option>
+                <option value="子祐" data-grade="國一">子祐 (國一)</option>
+            </select>
         </div>
-        <div class="input-group" style="margin-top: 15px;">
-            <label>今天哪個「環節」最卡關？</label>
-            <textarea id="sComment" rows="2" placeholder="學生簡述..."></textarea>
+
+        <div class="section-card" style="border-left: 8px solid var(--student); background: #fffcf0;">
+            <span class="title-tag" style="background: #fef3c7; color: #b45309;">Student Reflection 學生自評</span>
+            <div class="slider-group">
+                <label>1. 觀念理解信心度：<span id="v1">5</span>/10</label>
+                <input type="range" id="sConf" min="1" max="10" value="5" oninput="v1.innerText=this.value">
+            </div>
+            <div class="slider-group">
+                <label>2. 今日專注能量值：<span id="v2">5</span>/10</label>
+                <input type="range" id="sFocus" min="1" max="10" value="5" oninput="v2.innerText=this.value">
+            </div>
+            <label>3. 今日最有成就感的地方？</label>
+            <textarea id="sBest" rows="2" placeholder="例：我終於搞懂比例式的列式了！"></textarea>
         </div>
-    </div>
 
-    <div class="section-box">
-        <span class="section-title"><i class="fas fa-chalkboard-teacher"></i> 老師專業觀察</span>
-        <div class="input-group"><label>今日進度單元</label><input type="text" id="progress" placeholder="如：3-2 比例式"></div>
-        <div class="input-group" style="margin-top: 15px;"><label>觀察掌握度 (1-10)</label><input type="number" id="tScore" min="1" max="10"></div>
-        <div class="input-group" style="margin-top: 15px;"><label>關鍵弱點與教學對策</label><textarea id="weakness" rows="3"></textarea></div>
-    </div>
+        <div class="section-card" style="border-left: 8px solid var(--teacher); background: #f0fdf4;">
+            <span class="title-tag" style="background: #dcfce7; color: #166534;">Teacher Insight 老師觀察</span>
+            <label>今日授課單元</label>
+            <input type="text" id="progress" class="select-input" style="margin-bottom: 15px;" placeholder="單元名稱">
+            
+            <div class="slider-group">
+                <label>吸收轉化率：<span id="v3">50</span>%</label>
+                <input type="range" id="tMastery" min="0" max="100" step="10" value="50" oninput="v3.innerText=this.value">
+            </div>
+            <label>核心弱點精準描述</label>
+            <textarea id="tWeak" rows="3" placeholder="老師點評其邏輯或計算上的特定問題..."></textarea>
+        </div>
 
-    <div class="input-group"><label><i class="fas fa-tasks"></i> 下次上課前任務 (Todo)</label><textarea id="todo" rows="3"></textarea></div>
-    <button class="btn-submit" onclick="submitDaily()">產出紀錄並通知家長 <i class="fas fa-magic"></i></button>
+        <div class="section-card" style="border-left: 8px solid var(--primary);">
+            <span class="title-tag" style="background: #e0e7ff; color: #4338ca;">Mission 課後任務</span>
+            <textarea id="todo" rows="3" placeholder="請列出下次上課前需完成的具體任務..."></textarea>
+        </div>
+
+        <button class="btn-submit" onclick="submitDaily()">
+            生成深度紀錄並通知家長 <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
 </div>
 
 <script>
     function submitDaily() {
-        // 使用您提供的最新部署網址
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwsIzKsk-y25Fp0SF-Y0FU7d6cp4dzw76n8hk3N-poQ3-nygp7KzEG_KI2XLTlJGFAUIA/exec';
         const select = document.getElementById('sInfo');
         const selectedOption = select.options[select.selectedIndex];
         
         if(!select.value) return alert("請先選擇學生！");
 
+        // 計算今日戰鬥力指數 (量化結果)
+        const sScore = (parseInt(document.getElementById('sConf').value) + parseInt(document.getElementById('sFocus').value)) / 2;
+        const tScore = parseInt(document.getElementById('tMastery').value) / 10;
+        
         const data = {
             name: select.value,
             grade: selectedOption.getAttribute('data-grade'),
             progress: document.getElementById('progress').value,
-            sScore: document.getElementById('sScore').value,
-            tScore: document.getElementById('tScore').value,
-            // 合併學生自評與老師評論到 weakness 欄位，方便後端寫入與寄信
-            weakness: "【學生自評】：難度 " + document.getElementById('diffScore').value + " 分，卡關點：" + document.getElementById('sComment').value + "\n【老師點評】：" + document.getElementById('weakness').value,
+            sScore: sScore,
+            tScore: tScore,
+            weakness: "【成就感】：" + document.getElementById('sBest').value + "\n【老師觀察】：" + document.getElementById('tWeak').value,
             todo: document.getElementById('todo').value,
             type: "DAILY_FEEDBACK"
         };
 
-        if(!data.progress) return alert("請填寫今日進度單元！");
-        
         const btn = document.querySelector('.btn-submit');
-        btn.disabled = true; 
-        btn.innerText = "正在同步數據...";
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 數據計算中...';
 
-        fetch(scriptURL, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify(data) 
-        })
+        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) })
         .then(() => { 
-            alert("✅ " + data.name + " 的教學紀錄已成功送達家長信箱！"); 
+            alert("✅ " + data.name + " 的 100 分紀錄已成功同步！"); 
             location.reload(); 
-        })
-        .catch((err) => { 
-            console.error(err);
-            alert("發送失敗，請檢查網路連線！"); 
-            btn.disabled = false; 
-            btn.innerText = "產出紀錄並通知家長";
         });
     }
 </script>
