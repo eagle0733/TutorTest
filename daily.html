@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學力原點 | 每日教學紀錄</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #4f46e5; --bg: #f1f5f9; }
+        body { background: var(--bg); font-family: 'PingFang TC', sans-serif; padding: 15px; margin:0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header h2 { margin: 0; color: var(--primary); font-size: 1.5rem; text-align: center; }
+        .input-group { margin-top: 20px; }
+        label { display: block; font-weight: 800; margin-bottom: 8px; color: #334155; }
+        input, textarea, select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; }
+        .flex-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .btn-submit { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: 800; font-size: 1.1rem; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header"><h2>📝 每日教學回饋紀錄</h2></div>
+    <div class="input-group">
+        <label>學生姓名</label>
+        <select id="sName">
+            <option value="">請選擇學生...</option>
+            <option value="陳同學">陳同學 (國三)</option>
+            <option value="林同學">林同學 (國二)</option>
+            </select>
+    </div>
+    <div class="input-group"><label>今日進度</label><input type="text" id="progress" placeholder="如：圓周角性質"></div>
+    <div class="flex-row">
+        <div class="input-group"><label>學生自評 (1-10)</label><input type="number" id="sScore" min="1" max="10"></div>
+        <div class="input-group"><label>老師觀察 (1-10)</label><input type="number" id="tScore" min="1" max="10"></div>
+    </div>
+    <div class="input-group"><label>關鍵弱點</label><textarea id="weakness" rows="2"></textarea></div>
+    <div class="input-group"><label>課後任務與預計時數</label><textarea id="todo" rows="3" placeholder="P.10-15 (45min)"></textarea></div>
+    <button class="btn-submit" onclick="submitDaily()">上傳紀錄並存入資料庫 <i class="fas fa-paper-plane"></i></button>
+</div>
+
+<script>
+    function submitDaily() {
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz7Uj5kMvCPACNz9ocNbn1PhnpVSdZGpXTfVXKNkwqLxx1AXsTjdI7sW5WCWOY9jZ4m/exec';
+        const data = {
+            name: document.getElementById('sName').value,
+            progress: document.getElementById('progress').value,
+            sScore: document.getElementById('sScore').value,
+            tScore: document.getElementById('tScore').value,
+            weakness: document.getElementById('weakness').value,
+            todo: document.getElementById('todo').value,
+            type: "DAILY_FEEDBACK"
+        };
+        if(!data.name || !data.progress) return alert("請填寫姓名與進度！");
+        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) })
+        .then(() => { alert("✅ 紀錄成功！"); location.reload(); });
+    }
+</script>
+</body>
+</html>
