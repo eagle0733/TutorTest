@@ -620,26 +620,60 @@ function finish(){
 
     const scriptURL = "https://script.google.com/macros/s/AKfycbxdXgNvOgADlUgO1UeiN0A-p5SmAYp8_5U5Cc_F0HURthc4YxJWS72rK91pazl21MbMuA/exec";
 
-    fetch(scriptURL,{
-        method:"POST",
-        mode:"no-cors",
-        body:JSON.stringify({
-            ...userData,
-            plan:s.plan,
-            logic:s.logic,
-            creative:s.creative,
-            steady:s.steady,
-            social:s.social,
-            resilience:s.resilience,
-            mainType:main.title,
-            mainScore:main.score,
-            secondType:second.title,
-            secondScore:second.score,
-            type_flag:"DIAGNOSIS_V2"
-        })
+    const payload = {
+        ...userData,
+
+        // 新版六大能力
+        plan: s.plan,
+        logic: s.logic,
+        creative: s.creative,
+        steady: s.steady,
+        social: s.social,
+        resilience: s.resilience,
+
+        // 新版人格結果
+        mainType: main.title,
+        mainIcon: main.icon,
+        mainScore: main.score,
+        mainSub: main.sub,
+        mainDesc: main.desc,
+        mainAdvice: main.advice,
+
+        secondType: second.title,
+        secondIcon: second.icon,
+        secondScore: second.score,
+        secondSub: second.sub,
+
+        // 給舊版 Apps Script 信件模板相容用
+        type: main.title,
+        icon: main.icon,
+        sub: main.sub,
+        desc: main.desc,
+        advice: main.advice,
+
+        scoreA: s.plan,
+        scoreB: s.logic,
+        scoreC: s.resilience,
+
+        // 舊版信件若只寫自律/邏輯/心理，會先正常顯示這三項
+        oldAName: "自主規劃",
+        oldBName: "邏輯理解",
+        oldCName: "挫折恢復",
+
+        // 額外備用
+        scoreD: s.creative,
+        scoreE: s.steady,
+        scoreF: s.social,
+
+        type_flag: "DIAGNOSIS_V2"
+    };
+
+    fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload)
     });
 }
-
 function renderRanking(types){
     const box = document.getElementById("typeRanking");
     box.innerHTML = `<h3 style="color:#172554;margin-bottom:15px;">學習人格相似度</h3>`;
