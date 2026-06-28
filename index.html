@@ -312,7 +312,8 @@ input:focus,select:focus{
         </div>
     </div>
 
-    <div id="typeRanking" style="margin-top:30px;"></div>
+   <div id="typeRanking" style="margin-top:30px;"></div>
+   <div id="typeGuide" style="margin-top:24px;"></div>
 
     <div style="text-align:center;border-top:2px solid #e2e8f0;margin-top:35px;padding-top:30px;">
         <p style="font-weight:800;color:#475569;">建議預約老師面談，進一步解讀孩子的學習卡點與課程安排。</p>
@@ -676,23 +677,110 @@ function finish(){
 }
 function renderRanking(types){
     const box = document.getElementById("typeRanking");
-    box.innerHTML = `<h3 style="color:#172554;margin-bottom:15px;">學習人格相似度</h3>`;
+    const main = types[0];
+    const second = types[1];
 
-    types.slice(0,4).forEach(t=>{
-        const div = document.createElement("div");
-        div.className = "type-card";
-        div.innerHTML = `
-            <div class="score-row">
-                <span>${t.icon} ${t.title}</span>
-                <span>${t.score}%</span>
+    box.innerHTML = `
+        <h3 style="color:#172554;margin-bottom:15px;">最接近的學習特質</h3>
+        <div class="type-card">
+            <div style="font-size:1.1rem;font-weight:900;color:#1d4ed8;margin-bottom:8px;">
+                ${main.icon} 主要特質：${main.title}
             </div>
-            <div class="score-bar">
-                <div class="score-fill" style="width:${t.score}%"></div>
+            <div style="color:#475569;line-height:1.7;">
+                ${main.sub}
             </div>
-        `;
-        box.appendChild(div);
-    });
+        </div>
+
+        <div class="type-card">
+            <div style="font-size:1.1rem;font-weight:900;color:#16a34a;margin-bottom:8px;">
+                ${second.icon} 輔助特質：${second.title}
+            </div>
+            <div style="color:#475569;line-height:1.7;">
+                ${second.sub}
+            </div>
+        </div>
+    `;
+
+    renderTypeGuide();
 }
+function renderTypeGuide(){
+    const guide = document.getElementById("typeGuide");
+
+    const guides = [
+        {
+            icon:"🦅",
+            title:"領航老鷹",
+            text:"目標感強，重視效率與成果，適合高階挑戰與階段性任務。"
+        },
+        {
+            icon:"🐒",
+            title:"閃電靈猴",
+            text:"反應快、聯想力強，適合活潑引導，但需要建立穩定解題步驟。"
+        },
+        {
+            icon:"🐘",
+            title:"堅毅石象",
+            text:"穩定踏實、耐性佳，適合循序累積，但需要練習面對變化題。"
+        },
+        {
+            icon:"🦉",
+            title:"沉著貓頭鷹",
+            text:"觀察細膩、理解深入，適合系統化整理與觀念架構建立。"
+        },
+        {
+            icon:"🦊",
+            title:"策略狐狸",
+            text:"聰明靈活、善於找方法，但需要避免跳步與忽略基本功。"
+        },
+        {
+            icon:"🐬",
+            title:"共學海豚",
+            text:"互動感強，適合討論、陪伴與即時回饋式學習。"
+        },
+        {
+            icon:"🐆",
+            title:"衝刺黑豹",
+            text:"行動力強，適合短期目標刺激，但需要把衝勁轉成長期習慣。"
+        },
+        {
+            icon:"✨",
+            title:"潛力星火",
+            text:"需要先建立信心、節奏與小成就感，再逐步提高學習難度。"
+        }
+    ];
+
+    guide.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h3 style="color:#172554;margin:0;">8 種學習特質簡介</h3>
+            <button class="btn btn-prev" style="padding:10px 18px;font-size:.9rem;" onclick="toggleTypeGuide()">
+                查看 / 收合說明
+            </button>
+        </div>
+
+        <div id="typeGuideContent" style="display:none;margin-top:16px;grid-template-columns:1fr 1fr;gap:14px;">
+            ${guides.map(g => `
+                <div class="type-card" style="margin-top:0;">
+                    <div style="font-weight:900;color:#1d4ed8;margin-bottom:6px;">
+                        ${g.icon} ${g.title}
+                    </div>
+                    <div style="color:#475569;line-height:1.6;font-size:.95rem;">
+                        ${g.text}
+                    </div>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+function toggleTypeGuide(){
+    const content = document.getElementById("typeGuideContent");
+
+    if(content.style.display === "none"){
+        content.style.display = "grid";
+    }else{
+        content.style.display = "none";
+    }
+}
+    
 
 function renderRadar(s){
     if(radarChart) radarChart.destroy();
