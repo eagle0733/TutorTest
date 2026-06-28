@@ -382,28 +382,36 @@ const dimensionLabels = {
 
 function start(){
     const name = document.getElementById("uName").value.trim();
-    const email = document.getElementById("uEmail").value.trim();
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    const email = document.getElementById("uEmail").value.trim()
+        .replace(/[Ａ-Ｚａ-ｚ０-９＠．＿－]/g, function(s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+        });
 
-    if(!name || !emailRegex.test(email)){
-        alert("請填寫正確的姓名與電子信箱！");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!name){
+        alert("請填寫學生姓名！");
+        return;
+    }
+
+    if(!emailRegex.test(email)){
+        alert("請填寫正確的電子信箱！");
         return;
     }
 
     userData = {
         name,
         email,
-        grade:document.getElementById("uGrade").value,
-        line:document.getElementById("uLine").value,
-        strong:document.getElementById("uStrong").value,
-        weak:document.getElementById("uWeak").value
+        grade: document.getElementById("uGrade").value,
+        line: document.getElementById("uLine").value,
+        strong: document.getElementById("uStrong").value,
+        weak: document.getElementById("uWeak").value
     };
 
     document.getElementById("step-info").classList.remove("active");
     document.getElementById("step-quiz").classList.add("active");
     render();
 }
-
 function render(){
     const q = questions[cur];
     document.getElementById("qText").innerText = q.q;
